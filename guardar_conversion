@@ -1,0 +1,38 @@
+import psycopg2
+from flask import Flask, request, render_template
+
+app = Flask(__name__)
+
+def create_connection():
+    # Configura la conexión a la base de datos PostgreSQL
+    conn = psycopg2.connect(
+        user='fl0user',            # Reemplaza con tu nombre de usuario de PostgreSQL
+        password='Ig0OxZwr5LRM',    # Reemplaza con tu contraseña de PostgreSQL
+        host='ep-summer-star-31933799.ap-southeast-1.aws.neon.fl0.io',            # Host de tu servidor PostgreSQL
+        database='conversiones_db',
+        port='5432' 
+    )
+    return conn
+
+@app.route('/', methods=['POST'])
+def guardar_conversion():
+    nombre = request.form['nombre']
+    celsius = float(request.form['celsius'])
+    fahrenheit = (celsius * 9/5) + 32
+
+    conn = create_connection()
+    cursor = conn.cursor()
+
+    # Insertar los datos en la base de datos PostgreSQL
+    cursor.execute('INSERT INTO conversiones (nombre, celsius, fahrenheit) VALUES (%s, %s, %s)', (nombre, celsius, fahrenheit))
+    conn.commit()
+    conn.close()
+
+    mensaje = f"Conversión guardada con éxito: {celsius}°C = {fahrenheit}°F"
+
+    return mensaje
+   
+
+if __name__ == '__main__':
+    app.run(debug=True)
+    
